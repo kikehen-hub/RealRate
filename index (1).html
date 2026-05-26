@@ -1,0 +1,795 @@
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#0A0A0A;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-text-size-adjust:100%;}
+#rr{background:#0A0A0A;min-height:100vh;width:100%;color:#fff;display:flex;flex-direction:column;position:relative;overflow:hidden;}
+#rr .pg{display:none;flex-direction:column;flex:1;min-height:100vh;}
+#rr .pg.active{display:flex;}
+#rr .tab-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;height:82px;background:#0A0A0A;border-top:1px solid #222;display:none;z-index:100;}
+#rr .tab-bar.visible{display:flex;}
+#rr .tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;border:none;background:transparent;color:#eee;font-size:26px;padding-bottom:8px;}
+#rr .tab-item i{font-size:28px;}
+#rr .tab-item.active{color:#00C853;}
+#rr .tab-wrap{position:relative;display:inline-block;}
+#rr .tab-badge{background:#FF1744;color:#fff;font-size:26px;font-weight:700;border-radius:10px;padding:1px 5px;position:absolute;top:-2px;right:-4px;}
+#rr .toast{position:fixed;top:env(safe-area-inset-top, 24px);left:50%;transform:translateX(-50%);background:#00C853;color:#000;padding:12px 24px;border-radius:20px;font-size:21px;font-weight:700;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;z-index:300;}
+#rr .toast.show{opacity:1;}
+#rr .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.88);display:none;align-items:center;justify-content:center;z-index:200;padding:24px;padding-bottom:calc(24px + env(safe-area-inset-bottom));}
+#rr .modal-bg.show{display:flex;}
+#rr .modal{background:#141414;border-radius:18px;padding:24px;width:100%;border:1px solid #2C2C2C;}
+
+#rr .bk{background:#141414;border:1.5px solid #2C2C2C;color:#fff;width:40px;height:40px;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+#rr .bk i{color:#fff;font-size:26px;}
+#rr .logo{font-size:26px;font-weight:700;color:#00C853;}
+#rr .ob-hdr{padding:24px 24px 0;display:flex;align-items:center;gap:14px;flex-shrink:0;min-height:68px;}
+#rr .pb-wrap{padding:14px 24px 0;flex-shrink:0;}
+#rr .pb-bg{background:#1A1A1A;border-radius:20px;height:2px;overflow:hidden;}
+#rr .pb-fill{height:100%;background:#00C853;border-radius:20px;transition:width .4s;}
+#rr .pb-lbl{font-size:26px;color:#ddd;margin-top:6px;}
+#rr .ob-body{flex:1;padding:32px 28px 0;display:flex;flex-direction:column;overflow-y:auto;}
+#rr .ob-foot{padding:20px 28px 52px;flex-shrink:0;display:flex;flex-direction:column;gap:12px;}
+#rr .btn{background:#141414;color:#fff;border:1.5px solid #2C2C2C;border-radius:16px;height:64px;font-size:21px;font-weight:600;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;}
+#rr .btn:disabled{background:#0D0D0D;color:#999;border-color:#1A1A1A;cursor:not-allowed;}
+#rr .btn-ghost{background:#0D0D0D;color:#ddd;border:1.5px solid #1E1E1E;border-radius:14px;height:50px;font-size:21px;font-weight:600;cursor:pointer;text-align:center;width:100%;}
+#rr .btn-confirm{background:#00C853;color:#000;border:none;border-radius:16px;height:64px;font-size:21px;font-weight:700;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;}
+#rr .btn-full{width:calc(100% - 40px);margin:0 20px 12px;height:64px;background:#141414;color:#fff;border:1.5px solid #2C2C2C;border-radius:14px;font-size:26px;font-weight:600;cursor:pointer;}
+#rr .btn-full-green{width:calc(100% - 40px);margin:0 20px 12px;height:64px;background:#00C853;color:#000;border:none;border-radius:14px;font-size:26px;font-weight:700;cursor:pointer;}
+#rr .lang-btn{width:100%;height:66px;border-radius:16px;border:1.5px solid #2C2C2C;background:#141414;color:#fff;font-size:26px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
+#rr .name-inp{background:#141414;border:1.5px solid #2C2C2C;border-radius:14px;padding:20px;color:#fff;font-size:28px;font-weight:700;outline:none;width:100%;text-transform:uppercase;letter-spacing:1px;text-align:center;}
+#rr .name-inp:focus{border-color:#00C853;}
+#rr .name-inp::placeholder{color:#eee;font-size:26px;font-weight:400;letter-spacing:0;text-transform:none;}
+#rr .fields{display:flex;flex-direction:column;gap:8px;}
+#rr .field{background:#111;border-radius:12px;padding:0 16px;display:flex;align-items:center;gap:10px;border:1px solid #2A2A2A;min-height:60px;}
+#rr .field.sub{min-height:76px;padding:14px 18px;}
+#rr .field.hi{border-color:#00C85320;}
+#rr .field-l{flex:1;display:flex;flex-direction:column;gap:2px;}
+#rr .fl{font-size:26px;color:#fff;}
+#rr .fs{font-size:26px;color:#999;}
+#rr .inp{width:95px;min-width:95px;background:#1A1A1A;border:1px solid #2C2C2C;border-radius:8px;padding:9px 10px;color:#fff;font-size:26px;font-weight:600;text-align:right;outline:none;}
+#rr .unit{font-size:26px;color:#ddd;width:36px;text-align:right;flex-shrink:0;}
+#rr .eq-list{display:flex;flex-direction:column;gap:12px;width:100%;}
+#rr .eq-bar{background:#111;border:1.5px solid #1E1E1E;border-radius:16px;padding:22px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;border-left:3px solid #1E1E1E;}
+#rr .eq-bar.sel{border-color:#00C85340;border-left:3px solid #00C853;background:#00C85508;}
+#rr .eq-nm{font-size:21px;font-weight:600;color:#eee;}
+#rr .eq-bar.sel .eq-nm{color:#fff;}
+#rr .eq-dot{width:20px;height:20px;border-radius:50%;border:1.5px solid #777;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+#rr .eq-bar.sel .eq-dot{background:#00C853;border-color:#00C853;}
+#rr .eq-bar.sel .eq-dot i{display:flex;}
+#rr .eq-dot i{display:none;font-size:26px;color:#0A0A0A;}
+#rr .meta-card{background:#111;border-radius:18px;padding:36px 20px 32px;border:1px solid #00C85320;text-align:center;}
+#rr .meta-lbl{font-size:26px;color:#eee;text-transform:uppercase;letter-spacing:.8px;margin-bottom:32px;}
+#rr .meta-row{display:flex;align-items:center;justify-content:center;gap:4px;}
+#rr .meta-pre{font-size:32px;font-weight:700;color:#00C853;line-height:1;padding-bottom:8px;}
+#rr .meta-inp{background:transparent;border:none;border-bottom:2px solid #1E1E1E;outline:none;color:#00C853;font-size:44px;font-weight:700;width:200px;text-align:center;padding:0 4px;line-height:1;}
+#rr .meta-inp::placeholder{color:#bbb;}
+#rr .meta-u{font-size:26px;color:#ddd;align-self:flex-end;margin-bottom:8px;}
+#rr .meta-prev{font-size:26px;color:#ddd;margin-top:20px;line-height:1.5;text-align:center;}
+#rr .meta-prev.on{color:#00C853;}
+#rr .sum-card{background:#111;border-radius:18px;padding:24px;border:1px solid #222;text-align:center;margin-bottom:20px;}
+#rr .sum-rpm-sub{font-size:26px;color:#bbb;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
+#rr .sum-rpm-val{font-size:54px;font-weight:700;line-height:1;margin-bottom:14px;}
+#rr .sg2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+#rr .sg3-i{background:#0D0D0D;border-radius:10px;padding:12px 8px;text-align:center;}
+#rr .sg3-i .sl{font-size:26px;color:#ddd;margin-bottom:4px;}
+#rr .sg3-i .sv{font-size:21px;font-weight:700;color:#eee;}
+#rr .sg3-i .sv.g{color:#00C853;}
+#rr .mkt-verdict{border-radius:16px;padding:18px 20px;margin-bottom:20px;border:1px solid;}
+#rr .mkt-verdict.v-green{background:#00C85310;border-color:#00C85440;}
+#rr .mkt-verdict.v-yellow{background:#FFD60010;border-color:#FFD60040;}
+#rr .mkt-verdict.v-blue{background:#00B0FF10;border-color:#00B0FF40;}
+#rr .mkt-v-title{font-size:26px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px;}
+#rr .mkt-v-desc{font-size:26px;color:#eee;line-height:1.6;margin-bottom:12px;}
+#rr .mkt-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #1a1a1a;font-size:26px;}
+#rr .mkt-row:last-child{border-bottom:none;}
+#rr .mkt-row .rl{color:#bbb;}
+#rr .mkt-row .rv{font-weight:600;}
+#rr .rv-green{color:#00C853;}
+#rr .rv-yellow{color:#FFD600;}
+#rr .rv-blue{color:#00B0FF;}
+#rr .rv-red{color:#FF6060;}
+#rr .brk-note{font-size:26px;color:#999;padding:8px 0 0;line-height:1.4;}
+#rr .svars{background:#111;border-radius:16px;padding:18px 20px;margin-bottom:14px;border:1px solid #1E1E1E;}
+#rr .svars-t{font-size:26px;color:#ddd;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+#rr .svr{display:flex;justify-content:space-between;padding:5px 0;font-size:26px;border-bottom:1px solid #141414;}
+#rr .svr:last-child{border-bottom:none;}
+#rr .svr .vl{color:#bbb;}
+#rr .svr .vv{color:#eee;font-weight:600;}
+#rr .topbar{padding:24px 24px 12px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+#rr .tlg{font-size:26px;font-weight:700;color:#00C853;}
+#rr .rpm-bdg{background:#141414;border:1.5px solid #2C2C2C;border-radius:12px;padding:6px 14px;display:flex;flex-direction:column;align-items:center;gap:1px;}
+#rr .rpm-bdg .rb-lbl{font-size:26px;color:#ddd;text-transform:uppercase;letter-spacing:.4px;}
+#rr .rpm-bdg .rb-val{font-size:26px;font-weight:700;color:#00C853;line-height:1;}
+#rr .ppick{display:flex;gap:8px;padding:0 24px 10px;flex-shrink:0;}
+#rr .pp{flex:1;padding:8px 4px;border-radius:12px;border:1.5px solid #2C2C2C;font-size:26px;font-weight:700;cursor:pointer;background:#141414;color:#ddd;}
+#rr .pp.active{background:#fff;color:#000;border-color:#fff;}
+#rr .prange{font-size:26px;color:#ddd;text-align:center;padding:0 20px 10px;flex-shrink:0;}
+#rr .dscroll{overflow-y:auto;flex:1;padding-bottom:90px;}
+#rr .mc{margin:0 20px 14px;background:#141414;border-radius:18px;padding:22px;}
+#rr .mgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+#rr .mi{background:#1E1E1E;border-radius:10px;padding:10px;text-align:center;}
+#rr .mi .ml{font-size:26px;color:#bbb;}
+#rr .mi .mv{font-size:26px;font-weight:700;color:#fff;}
+#rr .gc{margin:0 20px 14px;background:#141414;border-radius:18px;padding:18px 20px;}
+#rr .gpbar-bg{background:#1E1E1E;border-radius:20px;height:8px;overflow:hidden;margin-bottom:6px;}
+#rr .gpbar{height:100%;border-radius:20px;}
+#rr .sctx{padding:20px 24px 14px;display:flex;align-items:center;gap:14px;flex-shrink:0;}
+#rr .slbl{font-size:26px;color:#bbb;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;padding-left:2px;}
+#rr .icard{background:#141414;border-radius:18px;padding:4px 0;overflow:hidden;margin:0 20px 14px;}
+#rr .irow{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #1E1E1E;}
+#rr .irow:last-child{border-bottom:none;}
+#rr .irow label{font-size:21px;color:#fff;flex:1;}
+#rr .irow .dl{font-size:21px;color:#bbb;font-weight:600;}
+#rr .irow input.fi{background:#1A1A1A;border:1px solid #2C2C2C;border-radius:8px;padding:8px 10px;color:#fff;font-size:26px;font-weight:600;text-align:right;outline:none;width:95px;min-width:95px;max-width:95px;}
+#rr .irow input.fi.sm{width:80px;min-width:80px;max-width:80px;}
+#rr .city-inp{background:#1A1A1A;border:1px solid #2C2C2C;border-radius:8px;padding:9px 10px;color:#fff;font-size:21px;font-weight:600;outline:none;flex:1;text-transform:uppercase;letter-spacing:.5px;}
+#rr .city-inp::placeholder{color:#999;text-transform:none;font-weight:400;letter-spacing:0;}
+#rr .irow .un{font-size:26px;color:#ddd;min-width:30px;}
+#rr .rh{margin:0 20px 14px;border-radius:18px;padding:28px 22px 22px;border:1px solid #2C2C2C;background:#141414;}
+#rr .rh-lbl{font-size:26px;color:#bbb;text-transform:uppercase;letter-spacing:.5px;text-align:center;margin-bottom:4px;}
+#rr .rh-net{font-size:62px;font-weight:700;line-height:1;text-align:center;}
+#rr .rh-rpm{font-size:26px;font-weight:700;text-align:center;color:#fff;margin-top:6px;}
+#rr .rh-diff{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;padding:10px 16px;border-radius:10px;}
+#rr .rh-div{border:none;border-top:1px solid #1E1E1E;margin:16px 0 12px;}
+#rr .rh-bk{display:flex;flex-direction:column;gap:5px;}
+#rr .rh-row{display:flex;justify-content:space-between;font-size:26px;}
+#rr .rh-row .rl{color:#bbb;}
+#rr .neg{color:#FF6060;}
+#rr .grn{color:#00C853;}
+#rr .vc{margin:0 20px 14px;border-radius:18px;padding:22px;border:1px solid;text-align:center;}
+#rr .vc.good{background:#00C85310;border-color:#00C85440;}
+#rr .vc.fair{background:#FFD60010;border-color:#FFD60040;}
+#rr .vc.bad{background:#FF174410;border-color:#FF174440;}
+#rr .vc.excellent{background:#00B0FF10;border-color:#00B0FF40;}
+#rr .vl{font-size:26px;font-weight:700;letter-spacing:1px;margin-bottom:8px;}
+#rr .vl.good{color:#00C853;}
+#rr .vl.fair{color:#FFD600;}
+#rr .vl.bad{color:#FF1744;}
+#rr .vl.excellent{color:#00B0FF;}
+#rr .vd{font-size:26px;color:#bbb;line-height:1.5;margin-bottom:12px;}
+#rr .vpb{background:#1E1E1E;border-radius:20px;height:5px;overflow:hidden;}
+#rr .vpf{height:100%;border-radius:20px;}
+#rr .vpf.good{background:#00C853;}
+#rr .vpf.fair{background:#FFD600;}
+#rr .vpf.bad{background:#FF1744;}
+#rr .vpf.excellent{background:#00B0FF;}
+#rr .az-scroll{overflow-y:auto;flex:1;padding-bottom:8px;}
+#rr .az-bar{padding:14px 16px 16px;background:#0A0A0A;border-top:1px solid #222;display:none;gap:10px;flex-shrink:0;}
+#rr .az-bar.show{display:flex;}
+#rr .az-spacer{height:70px;flex-shrink:0;}
+#rr .btn-acc{flex:1;height:64px;background:#00C853;color:#000;border:none;border-radius:14px;font-size:26px;font-weight:800;cursor:pointer;}
+#rr .btn-dis{flex:1;height:64px;background:#141414;color:#fff;border:1.5px solid #2C2C2C;border-radius:14px;font-size:26px;font-weight:600;cursor:pointer;}
+#rr .scrl{overflow-y:auto;flex:1;padding-bottom:90px;}
+#rr .hlist{padding:0 20px;}
+#rr .lcard{background:#141414;border-radius:16px;padding:20px;margin-bottom:14px;border-left:3px solid;position:relative;}
+#rr .lcr{font-size:26px;font-weight:700;color:#fff;margin-bottom:4px;padding-right:76px;}
+#rr .lcm{font-size:26px;color:#bbb;margin-bottom:12px;}
+#rr .lcn{display:flex;justify-content:space-between;align-items:flex-end;padding-top:10px;border-top:1px solid #1E1E1E;}
+#rr .lc-actions{position:absolute;top:14px;right:14px;display:flex;gap:8px;}
+#rr .lc-btn{background:#000;border:1.5px solid #2C2C2C;border-radius:10px;cursor:pointer;width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+#rr .lc-btn i{font-size:26px;color:#fff;}
+#rr .close-btn{background:#000;border:1.5px solid #2C2C2C;color:#fff;width:34px;height:34px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+#rr .close-btn i{color:#fff;}
+#rr .sc{margin:0 20px 14px;background:#141414;border-radius:18px;padding:18px;}
+#rr .sg2h{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+#rr .si{background:#1E1E1E;border-radius:10px;padding:10px;}
+#rr .si .sl{font-size:26px;color:#bbb;}
+#rr .si .sv{font-size:26px;font-weight:700;color:#fff;}
+#rr .lv-card{border-radius:16px;padding:18px 20px;margin:0 20px 12px;border:1px solid;display:flex;align-items:center;justify-content:space-between;}
+#rr .lv-card.exc{background:#00B0FF10;border-color:#00B0FF30;}
+#rr .lv-card.gol{background:#00C85315;border-color:#00C85350;}
+#rr .lv-card.fai{background:#FFD60010;border-color:#FFD60030;}
+#rr .lv-l{display:flex;flex-direction:column;gap:4px;}
+#rr .lv-t{font-size:26px;font-weight:700;letter-spacing:.5px;}
+#rr .lv-t.exc{color:#00B0FF;}
+#rr .lv-t.gol{color:#00C853;}
+#rr .lv-t.fai{color:#FFD600;}
+#rr .lv-d{font-size:26px;color:#bbb;line-height:1.4;}
+#rr .lv-r{display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
+#rr .lv-n{font-size:30px;font-weight:700;line-height:1;}
+#rr .lv-n.exc{color:#00B0FF;}
+#rr .lv-n.gol{color:#00C853;}
+#rr .lv-n.fai{color:#FFD600;}
+#rr .lv-p{font-size:26px;padding:3px 8px;border-radius:8px;font-weight:600;}
+#rr .lv-p.exc{background:#00B0FF20;color:#00B0FF;}
+#rr .lv-p.gol{background:#00C85320;color:#00C853;}
+#rr .lv-p.fai{background:#FFD60020;color:#FFD600;}
+#rr .dz{margin:0 16px 12px;background:#1A0808;border:1px solid #5C1A1A;border-radius:12px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;}
+#rr .rpm-card{margin:0 20px 14px;background:#111;border-radius:18px;padding:26px;border:1px solid #00C85330;text-align:center;}
+#rr .wgb{margin:0 20px 14px;background:#0D1F14;border-radius:18px;padding:20px;border:1px solid #00C85330;}
+#rr .wgb-r{display:flex;justify-content:space-between;align-items:center;padding:6px 0;}
+#rr .wgb-r .wl{font-size:21px;color:#eee;}
+#rr .wgb-r .wv{font-size:26px;font-weight:700;color:#00C853;}
+#rr .no-active{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:40px;text-align:center;}
+#rr .msumm{margin:0 20px 14px;background:#0D1F14;border-radius:14px;padding:16px 20px;}
+#rr .mtots{display:flex;gap:8px;}
+#rr .mti{flex:1;text-align:center;background:#0A0A0A;border-radius:8px;padding:8px 6px;}
+#rr .mti .mtl{font-size:26px;color:#bbb;}
+#rr .mti .mtv{font-size:26px;font-weight:700;color:#00C853;}
+#rr .bkcard{margin:0 20px 14px;background:#141414;border-radius:18px;padding:20px;}
+#rr .bkrow{display:flex;justify-content:space-between;padding:7px 0;font-size:21px;border-bottom:1px solid #1E1E1E;}
+#rr .bkrow:last-child{border-bottom:none;}
+#rr .bkrow .rl{color:#eee;}
+#rr .bkrow .rv{font-weight:600;color:#eee;}
+#rr .bkrow .rv.grn{color:#00C853;}
+#rr .bkrow .rv.neg{color:#FF6060;}
+#rr .edit-inner{background:#141414;border-radius:18px;width:100%;border:1px solid #2C2C2C;overflow:hidden;max-height:90vh;display:flex;flex-direction:column;}
+#rr .edit-hdr{padding:18px 20px;border-bottom:1px solid #222;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+#rr .edit-body{overflow-y:auto;flex:1;}
+#rr .edit-foot{padding:16px 20px 20px;border-top:1px solid #222;flex-shrink:0;}
+</style>
+</head>
+<body>
+<div id="rr">
+<div class="toast" id="rr-toast"></div>
+
+
+<div class="modal-bg" id="rr-modal-del">
+  <div class="modal">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="width:54px;height:54px;background:#1A0808;border:1.5px solid #5C1A1A;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;"><i class="ti ti-trash" style="font-size:28px;color:#FF6060;"></i></div>
+      <div style="font-size:28px;font-weight:700;margin-bottom:8px;">¿Eliminar esta carga?</div>
+      <div style="font-size:19px;color:#eee;" id="rr-del-s">—</div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="RR.closeDel()" style="flex:1;height:50px;background:#141414;color:#fff;border:1.5px solid #2C2C2C;border-radius:12px;font-size:28px;font-weight:600;cursor:pointer;">Cancelar</button>
+      <button onclick="RR.confirmDel()" style="flex:1;height:50px;background:#C0392B;color:#fff;border:none;border-radius:12px;font-size:28px;font-weight:700;cursor:pointer;">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="rr-modal-edit">
+  <div class="edit-inner">
+    <div class="edit-hdr">
+      <div style="font-size:19px;font-weight:700;">Editar Carga</div>
+      <button class="close-btn" onclick="RR.closeEdit()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="edit-body">
+      <div class="icard" style="margin-top:12px;">
+        <div class="irow"><label><i class="ti ti-map-pin" style="color:#00C853;margin-right:4px;"></i>Pickup</label><input class="city-inp" id="rr-edit-pickup" placeholder="Ciudad origen"></div>
+        <div class="irow"><label><i class="ti ti-map-pin" style="color:#FF6B35;margin-right:4px;"></i>Delivery</label><input class="city-inp" id="rr-edit-delivery" placeholder="Ciudad destino"></div>
+        <div class="irow"><label>Millas carga</label><input class="fi" type="number" id="rr-edit-miles" placeholder="0"><span class="un">mi</span></div>
+        <div class="irow"><label>Deadhead</label><input class="fi" type="number" id="rr-edit-dh" placeholder="0"><span class="un">mi</span></div>
+        <div class="irow"><label>Pago Bruto</label><span class="dl">$</span><input class="fi" type="number" id="rr-edit-gross" placeholder="0"></div>
+        <div class="irow"><label>Precio Petróleo</label><span class="dl">$</span><input class="fi" type="number" id="rr-edit-diesel" placeholder="3.85" step="0.01"><span class="un">/gal</span></div>
+        <div class="irow"><label>Ganancia Neta</label><span class="dl">$</span><input class="fi" type="number" id="rr-edit-net" placeholder="0" step="1"></div>
+      </div>
+    </div>
+    <div class="edit-foot">
+      <button onclick="RR.saveEdit()" style="width:100%;height:54px;background:#00C853;color:#000;border:none;border-radius:14px;font-size:28px;font-weight:700;cursor:pointer;">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<div class="tab-bar" id="rr-tab-bar">
+  <button class="tab-item" id="rr-ti-home" onclick="RR.goTab('dashboard')"><i class="ti ti-home"></i><span>Home</span></button>
+  <button class="tab-item" id="rr-ti-loads" onclick="RR.goTab('loads')"><div class="tab-wrap"><i class="ti ti-truck"></i><span class="tab-badge" id="rr-loads-badge" style="display:none;">1</span></div><span>Cargas</span></button>
+  <button class="tab-item" id="rr-ti-history" onclick="RR.goTab('history')"><i class="ti ti-list"></i><span>Historial</span></button>
+  <button class="tab-item" id="rr-ti-numbers" onclick="RR.goTab('numbers')"><i class="ti ti-adjustments"></i><span>Mis Números</span></button>
+</div>
+
+<div class="pg active" id="rr-pg-lang">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;">
+    <div style="font-size:40px;font-weight:700;color:#00C853;letter-spacing:-1px;margin-bottom:10px;">RealRate</div>
+    <div style="font-size:19px;color:#bbb;margin-bottom:70px;">Owner-Operator Profit Calculator</div>
+    <button class="lang-btn" onclick="RR.start()">English</button>
+    <div style="display:flex;align-items:center;gap:12px;width:100%;margin-bottom:14px;"><div style="flex:1;height:1px;background:#1A1A1A;"></div><span style="font-size:28px;color:#999;">or / o</span><div style="flex:1;height:1px;background:#1A1A1A;"></div></div>
+    <button class="lang-btn" onclick="RR.start()">Español</button>
+  </div>
+</div>
+
+<div class="pg" id="rr-pg-1">
+  <div class="ob-hdr"><div class="logo">RealRate</div></div>
+  <div class="ob-body" style="justify-content:center;">
+    <div style="font-size:34px;font-weight:700;line-height:1.2;margin-bottom:52px;">Bienvenido.<br>¿Cómo te <span style="color:#00C853;">llamas?</span></div>
+    <input class="name-inp" id="rr-op-name" type="text" oninput="RR.checkName()" maxlength="30" placeholder="Tu nombre">
+    <div style="font-size:28px;color:#ddd;margin-top:12px;text-align:center;">Primer nombre</div>
+  </div>
+  <div class="ob-foot"><button class="btn" id="rr-btn-name" onclick="RR.goPg(2)" disabled>Continuar <i class="ti ti-arrow-right"></i></button></div>
+</div>
+
+<div class="pg" id="rr-pg-2">
+  <div class="ob-hdr"><button class="bk" onclick="RR.goPg(1)"><i class="ti ti-arrow-left"></i></button><div class="logo">RealRate</div></div>
+  <div class="ob-body">
+    <div style="font-size:38px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:20px;text-align:center;line-height:1.1;" id="rr-ob2-name">—</div>
+    <div style="text-align:center;font-size:19px;font-weight:600;margin-bottom:10px;">Esta app trabaja para ti.</div>
+    <div style="text-align:center;font-size:28px;font-weight:700;color:#00C853;margin-bottom:28px;">Tu negocio. Tus números. Tu meta semanal.</div>
+    <div style="flex:1;"><div style="font-size:19px;color:#ddd;line-height:2;">RealRate te ayuda a descubrir cuánto necesitas cobrar realmente por cada carga según tus gastos y tus objetivos personales. Analiza cargas, calcula el rate que debes pedir y lleva el control de cuánto realmente estás ganando semana tras semana.<br><br>Completa los siguientes pasos para conocer si tu meta semanal es alcanzable en el mercado actual y cuánto necesitas cobrar en cada carga para lograrla.</div></div>
+  </div>
+  <div class="ob-foot"><button class="btn" onclick="RR.goPg(3)">Configurar mis números <i class="ti ti-arrow-right"></i></button></div>
+</div>
+
+<div class="pg" id="rr-pg-3">
+  <div class="ob-hdr"><button class="bk" onclick="RR.goPg(2)"><i class="ti ti-arrow-left"></i></button><div style="font-size:28px;font-weight:600;color:#bbb;">Mis números</div></div>
+  <div class="pb-wrap"><div class="pb-bg"><div class="pb-fill" style="width:20%"></div></div><div class="pb-lbl">Paso 1 de 5 — Costos fijos</div></div>
+  <div class="ob-body">
+    <div style="font-size:28px;font-weight:700;margin-bottom:18px;">Datos operacionales</div>
+    <div class="fields">
+      <div class="field"><div class="field-l"><span class="fl">Pago Camión</span></div><input class="inp" id="rr-f-truck" type="number" value="0"><span class="unit">$/mes</span></div>
+      <div class="field"><div class="field-l"><span class="fl">Pago Trailer</span></div><input class="inp" id="rr-f-trailer" type="number" value="0"><span class="unit">$/mes</span></div>
+      <div class="field"><div class="field-l"><span class="fl">Seguro</span></div><input class="inp" id="rr-f-insurance" type="number" value="0"><span class="unit">$/mes</span></div>
+      <div class="field sub"><div class="field-l"><span class="fl">Parqueo</span><span class="fs">Opcional</span></div><input class="inp" id="rr-f-parking" type="number" value="0"><span class="unit">$/mes</span></div>
+      <div class="field sub"><div class="field-l"><span class="fl">ELD</span><span class="fs">Opcional</span></div><input class="inp" id="rr-f-eld" type="number" value="0"><span class="unit">$/mes</span></div>
+      <div class="field sub"><div class="field-l"><span class="fl">Otros fijos</span><span class="fs">Opcional</span></div><input class="inp" id="rr-f-other-fixed" type="number" value="0"><span class="unit">$/mes</span></div>
+      <div class="field sub hi"><div class="field-l"><span class="fl">Millas mensuales</span><span class="fs">Promedio al mes</span></div><input class="inp" id="rr-f-miles" type="number" value="0"><span class="unit">mi</span></div>
+      <div class="field sub hi"><div class="field-l"><span class="fl">MPG</span><span class="fs">Millas por galón</span></div><input class="inp" id="rr-f-mpg" type="number" value="0" step="0.1"><span class="unit">mpg</span></div>
+    </div>
+  </div>
+  <div class="ob-foot"><button class="btn" onclick="RR.goPg(4)">Continuar <i class="ti ti-arrow-right"></i></button></div>
+</div>
+
+<div class="pg" id="rr-pg-4">
+  <div class="ob-hdr"><button class="bk" onclick="RR.goPg(3)"><i class="ti ti-arrow-left"></i></button><div style="font-size:28px;font-weight:600;color:#bbb;">Mis números</div></div>
+  <div class="pb-wrap"><div class="pb-bg"><div class="pb-fill" style="width:40%"></div></div><div class="pb-lbl">Paso 2 de 5 — Gastos variables</div></div>
+  <div class="ob-body">
+    <div style="font-size:28px;font-weight:700;margin-bottom:18px;">Gastos variables</div>
+    <div class="fields">
+      <div class="field"><div class="field-l"><span class="fl">Factoring</span></div><input class="inp" id="rr-f-factor" type="number" value="0" max="100"><span class="unit">%</span></div>
+      <div class="field"><div class="field-l"><span class="fl">Dispatch</span></div><input class="inp" id="rr-f-dispatch" type="number" value="0" max="100"><span class="unit">%</span></div>
+      <div class="field"><div class="field-l"><span class="fl">Lease</span></div><input class="inp" id="rr-f-lease" type="number" value="0" max="100"><span class="unit">%</span></div>
+      <div class="field sub"><div class="field-l"><span class="fl">Mantenimiento</span><span class="fs">Opcional</span></div><input class="inp" id="rr-f-maint" type="number" value="0" max="100"><span class="unit">%</span></div>
+      <div class="field sub"><div class="field-l"><span class="fl">Taxes</span><span class="fs">Opcional</span></div><input class="inp" id="rr-f-taxes" type="number" value="0" max="100"><span class="unit">%</span></div>
+      <div class="field sub"><div class="field-l"><span class="fl">Otros</span><span class="fs">Opcional</span></div><input class="inp" id="rr-f-otros-pct" type="number" value="0" max="100"><span class="unit">%</span></div>
+    </div>
+  </div>
+  <div class="ob-foot"><button class="btn" onclick="RR.goPg(5)">Continuar <i class="ti ti-arrow-right"></i></button></div>
+</div>
+
+<div class="pg" id="rr-pg-5">
+  <div class="ob-hdr"><button class="bk" onclick="RR.goPg(4)"><i class="ti ti-arrow-left"></i></button><div style="font-size:28px;font-weight:600;color:#bbb;">Mis números</div></div>
+  <div class="pb-wrap"><div class="pb-bg"><div class="pb-fill" style="width:60%"></div></div><div class="pb-lbl">Paso 3 de 5 — Equipo</div></div>
+  <div class="ob-body">
+    <div style="font-size:28px;font-weight:700;line-height:1.25;">¿Qué tipo de equipo operas?</div>
+    <div style="flex:1;"></div>
+    <div class="eq-list">
+      <div class="eq-bar sel" onclick="RR.selEq(this,'dry-van')"><span class="eq-nm">Dry Van</span><div class="eq-dot"><i class="ti ti-check"></i></div></div>
+      <div class="eq-bar" onclick="RR.selEq(this,'reefer')"><span class="eq-nm">Reefer</span><div class="eq-dot"><i class="ti ti-check"></i></div></div>
+      <div class="eq-bar" onclick="RR.selEq(this,'flatbed')"><span class="eq-nm">Flatbed</span><div class="eq-dot"><i class="ti ti-check"></i></div></div>
+      <div class="eq-bar" onclick="RR.selEq(this,'power-only')"><span class="eq-nm">Power Only</span><div class="eq-dot"><i class="ti ti-check"></i></div></div>
+    </div>
+    <div style="flex:1;"></div>
+  </div>
+  <div class="ob-foot"><button class="btn" onclick="RR.goPg(6)">Continuar <i class="ti ti-arrow-right"></i></button></div>
+</div>
+
+<div class="pg" id="rr-pg-6">
+  <div class="ob-hdr"><button class="bk" onclick="RR.goPg(5)"><i class="ti ti-arrow-left"></i></button><div style="font-size:28px;font-weight:600;color:#bbb;">Mis números</div></div>
+  <div class="pb-wrap"><div class="pb-bg"><div class="pb-fill" style="width:80%"></div></div><div class="pb-lbl">Paso 4 de 5 — Meta semanal</div></div>
+  <div class="ob-body">
+    <div style="font-size:28px;font-weight:700;line-height:1.3;margin-bottom:12px;">Lo más importante:<br><span style="color:#00C853;">Tu meta semanal.</span></div>
+    <div style="font-size:19px;color:#eee;line-height:1.6;margin-bottom:24px;">¿Cuánto necesitas en el bolsillo cada semana, después de pagar todo?</div>
+    <div style="flex:1;"></div>
+    <div class="meta-card">
+      <div class="meta-lbl">Meta semanal neta</div>
+      <div class="meta-row"><span class="meta-pre">$</span><input class="meta-inp" id="rr-f-goal" type="number" min="0" placeholder="0" oninput="RR.prevGoal()"><span class="meta-u">/sem</span></div>
+    </div>
+    <div class="meta-prev" id="rr-meta-prev" style="margin-top:20px;"></div>
+    <div style="flex:1;"></div>
+  </div>
+  <div class="ob-foot"><button class="btn" onclick="RR.buildSum();RR.goPg(7)">Ver resumen <i class="ti ti-arrow-right"></i></button></div>
+</div>
+
+<div class="pg" id="rr-pg-7">
+  <div class="ob-hdr"><button class="bk" onclick="RR.goPg(6)"><i class="ti ti-arrow-left"></i></button><div style="font-size:28px;font-weight:600;color:#bbb;">Confirmar</div></div>
+  <div class="pb-wrap"><div class="pb-bg"><div class="pb-fill" style="width:100%"></div></div><div class="pb-lbl">Paso 5 de 5 — Resumen</div></div>
+  <div class="ob-body" style="padding-bottom:8px;">
+    <div style="font-size:28px;font-weight:700;margin-bottom:16px;">Tus números</div>
+    <div class="sum-card">
+      <div class="sum-rpm-sub">Este es tu precio por milla</div>
+      <div class="sum-rpm-val" id="rr-sum-rpm-val">$0.00<span style="font-size:28px;color:#ddd;">/mi</span></div>
+      <div class="sg2">
+        <div class="sg3-i"><div class="sl">Meta semanal</div><div class="sv g" id="rr-sum-goal-v">$0</div></div>
+        <div class="sg3-i"><div class="sl">Millas/mes</div><div class="sv" id="rr-sum-miles-v">0 mi</div></div>
+      </div>
+    </div>
+    <div class="mkt-verdict v-green" id="rr-mkt-verdict">
+      <div class="mkt-v-title" id="rr-mkt-v-title" style="color:#00C853;">META ALCANZABLE</div>
+      <div class="mkt-v-desc" id="rr-mkt-v-desc">—</div>
+      <div class="mkt-row"><span class="rl">Este es tu precio por milla</span><span class="rv rv-green" id="rr-mkt-your">—</span></div>
+      <div class="mkt-row"><span class="rl" id="rr-t-mkt-mkt">Mercado</span><span class="rv" id="rr-mkt-avg" style="color:#ddd;">—</span></div>
+      <div class="mkt-row"><span class="rl">Break even</span><span class="rv rv-red" id="rr-mkt-be">—</span></div>
+      <div class="brk-note">Nunca aceptes una carga por debajo del break even.</div>
+    </div>
+    <div class="svars"><div class="svars-t">Gastos Variables</div><div id="rr-sum-vars-list"></div></div>
+    <div style="text-align:center;font-size:28px;color:#999;padding-bottom:4px;">¿Algo no está bien? <span style="color:#00C853;cursor:pointer;" onclick="RR.goPg(3)">Editar</span></div>
+  </div>
+  <div class="ob-foot">
+    <button class="btn-confirm" onclick="RR.finishOB()"><i class="ti ti-check"></i> Todo bien, empezar</button>
+    <button class="btn-ghost" onclick="RR.goPg(3)">Editar mis números</button>
+  </div>
+</div>
+
+<div class="pg" id="rr-pg-dashboard">
+  <div class="topbar"><div class="tlg">RealRate</div><div class="rpm-bdg"><span class="rb-lbl" style="font-size:19px;color:#bbb;">Tu precio/mi</span><span class="rb-val" id="rr-dash-rpm-op">$0.00</span></div></div>
+  <div class="ppick">
+    <button class="pp active" onclick="RR.setPeriod('week',this)">Esta Semana</button>
+    <button class="pp" onclick="RR.setPeriod('month',this)">Este Mes</button>
+    <button class="pp" onclick="RR.setPeriod('ytd',this)">Este Año</button>
+  </div>
+  <div class="prange" id="rr-dash-range"></div>
+  <div class="dscroll">
+    <div class="mc">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px;">
+        <div><div style="font-size:28px;color:#bbb;margin-bottom:3px;">Bruto</div><div style="font-size:28px;font-weight:600;color:#eee;" id="rr-dash-gross">$0</div></div>
+        <div style="text-align:right;"><div style="font-size:28px;color:#bbb;margin-bottom:3px;">Ganancia Real</div><div style="font-size:46px;font-weight:700;color:#00C853;line-height:1;" id="rr-dash-net">$0</div></div>
+      </div>
+      <div class="mgrid">
+        <div class="mi"><div class="ml">Cargas</div><div class="mv" id="rr-dash-loads">0</div></div>
+        <div class="mi"><div class="ml">Millas</div><div class="mv" id="rr-dash-miles">0</div></div>
+        <div class="mi"><div class="ml">RPM bruto</div><div class="mv" id="rr-dash-rpm">$0.00</div></div>
+      </div>
+    </div>
+    <div class="gc">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><span style="font-size:28px;color:#bbb;">Meta semanal</span><span style="font-size:19px;font-weight:700;"><span id="rr-gp-cur" style="color:#00C853;">$0</span> / <span id="rr-gp-goal" style="color:#bbb;">$0</span></span></div>
+      <div class="gpbar-bg"><div class="gpbar" id="rr-gpbar" style="width:0%;background:#00C853;"></div></div>
+      <div style="font-size:28px;color:#bbb;margin-top:4px;" id="rr-gp-sub">—</div>
+    </div>
+    <button class="btn-confirm" style="margin:0 16px 10px;width:calc(100% - 32px);" onclick="RR.openAnalyzer()">ANALIZAR CARGA</button>
+    <button class="btn" style="margin:0 16px 12px;width:calc(100% - 32px);" onclick="RR.goTab('minimum')">¿CUÁNTO PEDIR?</button>
+  </div>
+</div>
+
+<div class="pg" id="rr-pg-analyze">
+  <div class="sctx"><button class="bk" onclick="RR.goTab('dashboard')"><i class="ti ti-arrow-left"></i></button><div style="font-size:21px;font-weight:700;">Analizar Carga</div></div>
+  <div class="az-scroll">
+    <div style="margin:0 16px 6px;"><div class="slbl">Millas del viaje</div></div>
+    <div class="icard">
+      <div class="irow"><label>Deadhead</label><input class="fi sm" id="rr-man-dh" type="number" placeholder="0" oninput="RR.calcProfit()"><span class="un">mi</span></div>
+      <div class="irow"><label>Pickup → Entrega</label><input class="fi sm" id="rr-man-lm" type="number" placeholder="0" oninput="RR.calcProfit()"><span class="un">mi</span></div>
+    </div>
+    <div class="msumm" id="rr-man-sum" style="display:none;"><div class="mtots">
+      <div class="mti"><div class="mtl">Deadhead</div><div class="mtv" id="rr-m-dh">0 mi</div></div>
+      <div class="mti"><div class="mtl">Carga</div><div class="mtv" id="rr-m-load">0 mi</div></div>
+      <div class="mti"><div class="mtl">Total</div><div class="mtv" id="rr-m-total">0 mi</div></div>
+    </div></div>
+    <div style="margin:0 16px 6px;"><div class="slbl">Pago de la Carga</div></div>
+    <div class="icard"><div class="irow"><label>Pago Bruto</label><span style="font-size:28px;color:#00C853;font-weight:700;">$</span><input class="fi" type="number" id="rr-gross-pay" placeholder="0" oninput="RR.calcProfit()"></div></div>
+    <div style="margin:0 16px 6px;"><div class="slbl">Precio Petróleo</div></div>
+    <div class="icard"><div class="irow"><label>TX avg</label><span style="font-size:19px;color:#bbb;font-weight:600;">$</span><input class="fi" type="number" id="rr-diesel-price" value="3.85" oninput="RR.calcProfit()"><span class="un">/gal</span></div></div>
+    <div class="rh" id="rr-result-card" style="display:none;">
+      <div class="rh-lbl">Ganancia Real</div>
+      <div class="rh-net" id="rr-rh-net">$0</div>
+      <div class="rh-rpm" id="rr-rh-rpm">$0.00/mi</div>
+      <div class="rh-diff" id="rr-rh-diff" style="background:#00C85315;"><span style="font-size:28px;font-weight:700;" id="rr-rh-diff-t">—</span></div>
+      <hr class="rh-div">
+      <div class="rh-bk">
+        <div class="rh-row"><span class="rl">Pago Bruto</span><span class="grn" id="rr-r-gross">$0</span></div>
+        <div class="rh-row"><span class="rl" id="rr-r-diesel-lbl">Petróleo</span><span class="neg" id="rr-r-diesel">-$0</span></div>
+        <div class="rh-row" id="rr-r-fact-row" style="display:none;"><span class="rl" id="rr-r-fact-lbl">Factoring</span><span class="neg" id="rr-r-fact">-$0</span></div>
+        <div class="rh-row" id="rr-r-disp-row" style="display:none;"><span class="rl">Dispatch</span><span class="neg" id="rr-r-disp">-$0</span></div>
+        <div class="rh-row" id="rr-r-lease-row" style="display:none;"><span class="rl">Lease</span><span class="neg" id="rr-r-lease">-$0</span></div>
+        <div class="rh-row" id="rr-r-maint-row" style="display:none;"><span class="rl" id="rr-r-maint-lbl">Mantenimiento</span><span class="neg" id="rr-r-maint">-$0</span></div>
+        <div class="rh-row" id="rr-r-taxes-row" style="display:none;"><span class="rl">Taxes</span><span class="neg" id="rr-r-taxes">-$0</span></div>
+        <div class="rh-row"><span class="rl" id="rr-r-fixed-lbl">Gastos fijos</span><span class="neg" id="rr-r-fixed">-$0</span></div>
+        <div style="display:flex;justify-content:space-between;padding-top:8px;margin-top:4px;border-top:1px solid #1E1E1E;font-size:28px;"><span style="color:#bbb;">Millas totales</span><span style="color:#bbb;" id="rr-r-miles-info">—</span></div>
+      </div>
+    </div>
+    <div class="vc good" id="rr-verdict-card" style="display:none;">
+      <div class="vl good" id="rr-verdict-label">GOOD</div>
+      <div class="vd" id="rr-verdict-desc">—</div>
+      <div class="vpb"><div class="vpf good" id="rr-verdict-bar" style="width:0%"></div></div>
+    </div>
+    <div style="height:10px;"></div>
+  </div>
+  <div class="az-bar" id="rr-action-bar">
+    <button class="btn-dis" onclick="RR.discardLoad()">DESCARTAR</button>
+    <button class="btn-acc" onclick="RR.acceptLoad()">✓ ACEPTAR CARGA</button>
+  </div>
+  <div class="az-spacer"></div>
+</div>
+
+<div class="pg" id="rr-pg-minimum" style="padding-bottom:90px;">
+  <div class="sctx"><button class="bk" onclick="RR.goTab('dashboard')"><i class="ti ti-arrow-left"></i></button><div style="font-size:21px;font-weight:700;">¿Cuánto pedir?</div></div>
+  <div class="scrl">
+    <div style="margin:0 16px 6px;"><div class="slbl">Datos de la carga</div></div>
+    <div class="icard">
+      <div class="irow"><label>Millas deadhead</label><input class="fi" type="number" id="rr-min-dh" placeholder="0" oninput="RR.calcMin()"><span class="un">mi</span></div>
+      <div class="irow"><label>Millas de carga</label><input class="fi" type="number" id="rr-min-lm" placeholder="0" oninput="RR.calcMin()"><span class="un">mi</span></div>
+      <div class="irow"><label>Diesel hoy</label><span class="dl">$</span><input class="fi" type="number" id="rr-min-diesel" value="3.85" oninput="RR.calcMin()"><span class="un">/gal</span></div>
+    </div>
+    <div style="margin:0 16px;background:#141414;border-radius:14px;padding:28px 16px;text-align:center;margin-bottom:14px;" id="rr-min-empty"><div style="font-size:19px;color:#ddd;">Ingresa las millas para ver cuánto necesitas cobrar</div></div>
+    <div id="rr-min-results" style="display:none;">
+      <div style="margin:0 16px 8px;"><div class="slbl">Rangos para negociar</div></div>
+      <div class="lv-card exc"><div class="lv-l"><span class="lv-t exc">EXCELLENT</span><span class="lv-d">Empieza siempre aquí.</span></div><div class="lv-r"><span class="lv-n exc" id="rr-exc-total">$0</span><span class="lv-p exc">+15%</span></div></div>
+      <div class="lv-card gol"><div class="lv-l"><span class="lv-t gol">MY GOAL</span><span class="lv-d">La semana está cubierta.</span></div><div class="lv-r"><span class="lv-n gol" id="rr-goal-total">$0</span><span class="lv-p gol">100%</span></div></div>
+      <div class="lv-card fai"><div class="lv-l"><span class="lv-t fai">FAIR</span><span class="lv-d">Solo si el mercado está muy lento.</span></div><div class="lv-r"><span class="lv-n fai" id="rr-acc-total">$0</span><span class="lv-p fai">-15%</span></div></div>
+      <div class="dz"><div><div style="font-size:28px;font-weight:700;color:#FF6060;margin-bottom:2px;">Break even — referencia</div><div style="font-size:28px;color:#cc7777;line-height:1.4;">Nunca aceptes por debajo.</div></div><div style="font-size:28px;font-weight:700;color:#FF6060;" id="rr-be-total">$0</div></div>
+      <div style="margin:6px 16px 14px;text-align:center;font-size:28px;color:#ddd;" id="rr-min-hint">—</div>
+    </div>
+  </div>
+</div>
+
+<div class="pg" id="rr-pg-loads" style="padding-bottom:90px;">
+  <div class="topbar"><div style="font-size:19px;font-weight:700;">Carga Activa</div><div style="font-size:28px;background:#00C85320;color:#00C853;border-radius:20px;padding:4px 14px;font-weight:700;display:none;" id="rr-en-ruta">EN RUTA</div></div>
+  <div id="rr-loads-no-active" class="no-active">
+    <i class="ti ti-truck-off" style="font-size:62px;color:#222;"></i>
+    <div style="font-size:19px;font-weight:600;color:#eee;">Sin carga activa</div>
+    <div style="font-size:19px;color:#ddd;line-height:1.5;">Cuando aceptes una carga aparecerá aquí.</div>
+    <button onclick="RR.openAnalyzer()" style="margin-top:8px;background:#141414;color:#fff;border:1.5px solid #2C2C2C;border-radius:12px;padding:14px 28px;font-size:28px;font-weight:600;cursor:pointer;">ANALIZAR CARGA</button>
+  </div>
+  <div id="rr-loads-active" style="display:none;flex-direction:column;flex:1;overflow-y:auto;">
+    <div style="margin:0 16px 12px;background:#141414;border-radius:16px;overflow:hidden;">
+      <div style="padding:14px 16px;background:#00C85315;border-bottom:1px solid #00C85330;display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-size:28px;color:#eee;">Aceptada: <strong id="rr-loads-date" style="color:#fff;">—</strong></div>
+        <div style="font-size:28px;background:#00C853;color:#000;padding:4px 12px;border-radius:10px;font-weight:700;">EN PROCESO</div>
+      </div>
+      <div style="padding:16px;"><div style="font-size:19px;font-weight:700;margin-bottom:4px;" id="rr-loads-cities">—</div><div style="font-size:28px;color:#bbb;" id="rr-loads-meta">—</div></div>
+    </div>
+    <div style="margin:0 16px 12px;background:#141414;border-radius:16px;padding:22px;text-align:center;">
+      <div style="font-size:28px;color:#bbb;margin-bottom:8px;">Ganancia Proyectada</div>
+      <div style="font-size:50px;font-weight:700;color:#00C853;line-height:1;" id="rr-loads-profit">$0</div>
+      <div style="font-size:28px;font-weight:700;color:#fff;margin-top:10px;" id="rr-loads-rate">$0.00/mi</div>
+    </div>
+    <div class="bkcard">
+      <div class="bkrow"><span class="rl">Pago Bruto</span><span class="rv grn" id="rr-loads-gross">$0</span></div>
+      <div class="bkrow"><span class="rl">Petróleo</span><span class="rv neg" id="rr-loads-diesel">-$0</span></div>
+      <div class="bkrow"><span class="rl">Variables</span><span class="rv neg" id="rr-loads-vars">-$0</span></div>
+      <div class="bkrow"><span class="rl">Gastos fijos</span><span class="rv neg" id="rr-loads-fixed">-$0</span></div>
+    </div>
+    <button class="btn-full-green" onclick="RR.showReview()">MARCAR COMO FINALIZADA</button>
+  </div>
+</div>
+
+<div class="pg" id="rr-pg-review" style="padding-bottom:90px;">
+  <div class="sctx"><button class="bk" onclick="RR.showPg('loads')"><i class="ti ti-arrow-left"></i></button><div style="font-size:21px;font-weight:700;">Revisar y Guardar</div></div>
+  <div class="scrl">
+    <div class="bkcard" style="margin:0 16px 12px;">
+      <div style="font-size:19px;color:#eee;margin-bottom:4px;" id="rr-rev-info">—</div>
+      <div style="font-size:28px;color:#ddd;" id="rr-rev-miles-info">—</div>
+    </div>
+    <div style="margin:0 16px 6px;display:flex;justify-content:space-between;align-items:center;"><div class="slbl" style="margin-bottom:0;">Ruta</div><div style="font-size:28px;color:#ddd;background:#141414;border-radius:8px;padding:4px 12px;border:1px solid #2C2C2C;">Para tu historial</div></div>
+    <div class="icard">
+      <div class="irow"><label><i class="ti ti-map-pin" style="color:#00C853;margin-right:4px;"></i>Pickup</label><input class="city-inp" type="text" id="rr-pickup" placeholder="Ciudad origen"></div>
+      <div class="irow"><label><i class="ti ti-map-pin" style="color:#FF6B35;margin-right:4px;"></i>Delivery</label><input class="city-inp" type="text" id="rr-delivery" placeholder="Ciudad destino"></div>
+    </div>
+    <div style="margin:0 16px 6px;display:flex;justify-content:space-between;align-items:center;"><div class="slbl" style="margin-bottom:0;">Gastos adicionales</div><div style="font-size:28px;color:#ddd;background:#141414;border-radius:8px;padding:4px 12px;border:1px solid #2C2C2C;">Opcional</div></div>
+    <div class="icard">
+      <div class="irow"><label>Tolls</label><span class="dl">$</span><input class="fi sm" type="number" id="rr-extra-tolls" placeholder="0" oninput="RR.calcFinal()"></div>
+      <div class="irow"><label>Lumper</label><span class="dl">$</span><input class="fi sm" type="number" id="rr-extra-lumper" placeholder="0" oninput="RR.calcFinal()"></div>
+      <div class="irow"><label>Otros</label><span class="dl">$</span><input class="fi sm" type="number" id="rr-extra-other" placeholder="0" oninput="RR.calcFinal()"></div>
+    </div>
+    <div class="bkcard">
+      <div class="bkrow"><span class="rl">Ganancia base</span><span class="rv grn" id="rr-rev-base">$0</span></div>
+      <div class="bkrow" style="display:none;" id="rr-rev-tolls-row"><span class="rl">Tolls</span><span class="rv neg" id="rr-rev-tolls">-$0</span></div>
+      <div class="bkrow" style="display:none;" id="rr-rev-lumper-row"><span class="rl">Lumper</span><span class="rv neg" id="rr-rev-lumper">-$0</span></div>
+      <div class="bkrow" style="display:none;" id="rr-rev-other-row"><span class="rl">Otros</span><span class="rv neg" id="rr-rev-other-v">-$0</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;padding:14px 0 4px;border-top:1px solid #2C2C2C;margin-top:6px;"><span style="font-size:28px;font-weight:700;">GANANCIA FINAL</span><span style="font-size:32px;font-weight:700;color:#00C853;" id="rr-rev-final">$0</span></div>
+    </div>
+    <button class="btn-full-green" onclick="RR.saveLoad()">GUARDAR CARGA</button>
+  </div>
+</div>
+
+<div class="pg" id="rr-pg-history" style="padding-bottom:90px;">
+  <div class="topbar"><div style="font-size:19px;font-weight:700;">Historial</div></div>
+  <div class="ppick">
+    <button class="pp active" onclick="RR.setHistPeriod('week',this)">Esta Semana</button>
+    <button class="pp" onclick="RR.setHistPeriod('month',this)">Este Mes</button>
+    <button class="pp" onclick="RR.setHistPeriod('ytd',this)">Este Año</button>
+  </div>
+  <div class="prange" id="rr-hist-range"></div>
+  <div class="sc">
+    <div class="sg2h">
+      <div class="si"><div class="sl">Cargas</div><div class="sv" id="rr-hs-loads">0</div></div>
+      <div class="si"><div class="sl">Millas</div><div class="sv" id="rr-hs-miles">0</div></div>
+      <div class="si"><div class="sl">Bruto</div><div class="sv" id="rr-hs-gross">$0</div></div>
+      <div class="si"><div class="sl">Ganancia Real</div><div class="sv" id="rr-hs-net" style="color:#00C853;">$0</div></div>
+    </div>
+    <div style="text-align:center;font-size:19px;color:#bbb;padding-top:8px;border-top:1px solid #2C2C2C;">RPM: <span id="rr-hs-rpm" style="color:#00C853;font-weight:700;">$0.00</span></div>
+  </div>
+  <div class="scrl"><div class="hlist" id="rr-hist-list"></div></div>
+</div>
+
+<div class="pg" id="rr-pg-numbers" style="padding-bottom:90px;">
+  <div class="topbar"><div style="font-size:19px;font-weight:700;">Mis Números</div></div>
+  <div class="scrl">
+    <div class="rpm-card">
+      <div style="font-size:28px;color:#bbb;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;">Este es tu precio por milla</div>
+      <div style="font-size:56px;font-weight:700;line-height:1;margin-bottom:6px;" id="rr-prof-rpm-val">$0.00<span style="font-size:28px;color:#ddd;">/mi</span></div>
+      <div class="sg2" style="margin-top:16px;">
+        <div class="sg3-i"><div class="sl">Meta semanal</div><div class="sv g" id="rr-pcc-goal">$0</div></div>
+        <div class="sg3-i"><div class="sl">Millas/mes</div><div class="sv" id="rr-pcc-miles">0 mi</div></div>
+      </div>
+    </div>
+    <div style="margin:0 16px 6px;"><div class="slbl">Datos operacionales</div></div>
+    <div class="icard">
+      <div class="irow"><label>Pago Camión</label><input class="fi" type="number" id="rr-p-truck" value="0" oninput="RR.calcProfile()"><span class="un">$/mes</span></div>
+      <div class="irow"><label>Pago Trailer</label><input class="fi" type="number" id="rr-p-trailer" value="0" oninput="RR.calcProfile()"><span class="un">$/mes</span></div>
+      <div class="irow"><label>Seguro</label><input class="fi" type="number" id="rr-p-insurance" value="0" oninput="RR.calcProfile()"><span class="un">$/mes</span></div>
+      <div class="irow"><label>Parqueo</label><input class="fi" type="number" id="rr-p-parking" value="0" oninput="RR.calcProfile()"><span class="un">$/mes</span></div>
+      <div class="irow"><label>ELD</label><input class="fi" type="number" id="rr-p-eld" value="0" oninput="RR.calcProfile()"><span class="un">$/mes</span></div>
+      <div class="irow"><label>Otros fijos</label><input class="fi" type="number" id="rr-p-other-fixed" value="0" oninput="RR.calcProfile()"><span class="un">$/mes</span></div>
+      <div class="irow"><label>Millas mensuales</label><input class="fi" type="number" id="rr-p-miles" value="0" oninput="RR.calcProfile()"><span class="un">mi</span></div>
+      <div class="irow"><label>MPG</label><input class="fi" type="number" id="rr-p-mpg" value="0" oninput="RR.calcProfile()"><span class="un">mpg</span></div>
+    </div>
+    <div style="margin:0 16px 6px;"><div class="slbl">Gastos variables</div></div>
+    <div class="icard">
+      <div class="irow"><label>Factoring</label><input class="fi" type="number" id="rr-p-factor" value="0" oninput="RR.calcProfile()"><span class="un">%</span></div>
+      <div class="irow"><label>Dispatch</label><input class="fi" type="number" id="rr-p-dispatch" value="0" oninput="RR.calcProfile()"><span class="un">%</span></div>
+      <div class="irow"><label>Lease</label><input class="fi" type="number" id="rr-p-lease" value="0" oninput="RR.calcProfile()"><span class="un">%</span></div>
+      <div class="irow"><label>Mantenimiento</label><input class="fi" type="number" id="rr-p-maint" value="0" oninput="RR.calcProfile()"><span class="un">%</span></div>
+      <div class="irow"><label>Taxes</label><input class="fi" type="number" id="rr-p-taxes" value="0" oninput="RR.calcProfile()"><span class="un">%</span></div>
+      <div class="irow"><label>Otros</label><input class="fi" type="number" id="rr-p-otros" value="0" oninput="RR.calcProfile()"><span class="un">%</span></div>
+    </div>
+    <div style="margin:0 16px 6px;"><div class="slbl">Meta semanal</div></div>
+    <div class="icard"><div class="irow"><label>Meta neta/semana</label><input class="fi" type="number" id="rr-p-goal" value="0" oninput="RR.calcProfile()"><span class="un">$/sem</span></div></div>
+    <div class="wgb">
+      <div style="font-size:28px;color:#bbb;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">Tu objetivo semanal</div>
+      <div class="wgb-r"><span class="wl">Meta Semanal</span><span class="wv" id="rr-wgb-weekly">$0/sem</span></div>
+      <div class="wgb-r"><span class="wl">Millas/semana est.</span><span class="wv" id="rr-wgb-miles">0 mi</span></div>
+      <div class="wgb-r"><span class="wl">Rate neto mínimo</span><span class="wv" id="rr-wgb-rate">$0.00/mi</span></div>
+    </div>
+    <button class="btn-full-green" onclick="RR.saveProfile()">GUARDAR</button>
+    <button onclick="RR.resetData()" style="width:calc(100% - 32px);margin:4px 16px 24px;height:48px;background:transparent;color:#999;border:1px solid #222;border-radius:14px;font-size:28px;font-weight:600;cursor:pointer;">Restablecer todos los datos</button>
+  </div>
+</div>
+</div>
+
+<script>
+const RR=(()=>{
+  const APP={name:'',eq:'dry-van',activeLoad:null,loads:[],histPeriod:'week',dashPeriod:'week',pendingDelId:null,currentCalc:null,editingId:null,operatorRpm:0};
+  const MKT={'dry-van':{label:'Dry Van',min:2.10,max:2.40},'reefer':{label:'Reefer',min:2.30,max:2.70},'flatbed':{label:'Flatbed',min:2.50,max:2.90},'power-only':{label:'Power Only',min:1.80,max:2.20}};
+  const root=()=>document.getElementById('rr');
+  const g=id=>document.getElementById('rr-'+id);
+  const gv=id=>parseFloat(g(id)?.value)||0;
+  const fmt=n=>'$'+Math.abs(Math.round(n)).toLocaleString('en-US');
+  const fmtD=n=>'$'+Math.abs(parseFloat(n)).toFixed(2);
+  function showPg(n){root().querySelectorAll('.pg').forEach(p=>p.classList.remove('active'));const el=document.getElementById('rr-pg-'+n);if(el){el.classList.add('active');window.scrollTo(0,0);}}
+  function goPg(n){showPg(n);}
+  function start(){showPg(1);}
+  function toast(m,r=false){const t=g('toast');t.textContent=m;t.style.background=r?'#C0392B':'#00C853';t.style.color=r?'#fff':'#000';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+  function ucInput(el){const pos=el.selectionStart;el.value=el.value.toUpperCase();try{el.setSelectionRange(pos,pos);}catch(e){}}
+  function checkName(){const inp=g('op-name');ucInput(inp);g('btn-name').disabled=inp.value.trim().length<2;g('ob2-name').textContent=inp.value.trim()||'—';}
+  function selEq(bar,type){root().querySelectorAll('.eq-bar').forEach(b=>b.classList.remove('sel'));bar.classList.add('sel');APP.eq=type;}
+  function prevGoal(){const goal=gv('f-goal'),miles=gv('f-miles'),el=g('meta-prev');if(goal>0&&miles>0){const r=(goal/(miles/4)).toFixed(2);el.textContent=`Para $${goal.toLocaleString()}/semana necesitas $${r}/mi neto`;el.classList.add('on');}else{el.textContent='Ingresa tu meta para ver tu rate objetivo';el.classList.remove('on');}}
+  function getP(){return{truck:gv('p-truck'),trailer:gv('p-trailer'),insurance:gv('p-insurance'),parking:gv('p-parking'),eld:gv('p-eld'),otherFixed:gv('p-other-fixed'),factor:gv('p-factor'),dispatch:gv('p-dispatch'),lease:gv('p-lease'),maint:gv('p-maint'),taxes:gv('p-taxes'),otros:gv('p-otros'),miles:gv('p-miles'),mpg:gv('p-mpg')||6.5,goal:gv('p-goal')};}
+  const getMonthly=p=>p.truck+p.trailer+p.insurance+p.parking+p.eld+p.otherFixed;
+  const getCPM=p=>{const m=getMonthly(p);return p.miles>0?m/p.miles:0;};
+  const getVarPct=p=>((p.factor||0)+(p.dispatch||0)+(p.lease||0)+(p.maint||0)+(p.taxes||0)+(p.otros||0))/100;
+  const getGoalRate=()=>{const p=getP();const wm=p.miles/4;return wm>0?p.goal/wm:0;};
+  function calcOpRpm(){const monthly=gv('f-truck')+gv('f-trailer')+gv('f-insurance')+gv('f-parking')+gv('f-eld')+gv('f-other-fixed');const miles=gv('f-miles'),goal=gv('f-goal'),mpg=gv('f-mpg')||6.5;const wm=miles>0?miles/4:0,goalRate=wm>0?goal/wm:0;const varPct=((gv('f-factor')+gv('f-dispatch')+gv('f-lease')+gv('f-maint')+gv('f-taxes')+gv('f-otros-pct'))/100);const safe=varPct<1?1-varPct:0.5,cpm=miles>0?monthly/miles:0;const dpm=miles>0?(miles/mpg)*3.85/miles:0;return goalRate>0?(goalRate+cpm+dpm)/safe:0;}
+  function buildSum(){const monthly=gv('f-truck')+gv('f-trailer')+gv('f-insurance')+gv('f-parking')+gv('f-eld')+gv('f-other-fixed');const miles=gv('f-miles'),goal=gv('f-goal'),mpg=gv('f-mpg')||6.5;const wm=miles>0?miles/4:0,goalRate=wm>0?goal/wm:0;const varPct=((gv('f-factor')+gv('f-dispatch')+gv('f-lease')+gv('f-maint')+gv('f-taxes')+gv('f-otros-pct'))/100);const safe=varPct<1?1-varPct:0.5,cpm=miles>0?monthly/miles:0;const dpm=miles>0?(miles/mpg)*3.85/miles:0;const be=(cpm+dpm)/safe,rpm=goalRate>0?(goalRate+cpm+dpm)/safe:0;APP.operatorRpm=rpm;const mkt=MKT[APP.eq];let tt,dt,rc,rk,vc;if(rpm<mkt.min){tt='META MUY ALCANZABLE';dt=`Tu precio ($${rpm.toFixed(2)}/mi) está por debajo del piso del mercado ${mkt.label}.`;rc='#00B0FF';rk='rv-blue';vc='v-blue';}else if(rpm<=mkt.max){tt='META ALCANZABLE';dt=`Tu precio ($${rpm.toFixed(2)}/mi) está dentro del rango del mercado ${mkt.label}.`;rc='#00C853';rk='rv-green';vc='v-green';}else{tt='META AMBICIOSA';dt=`Tu precio ($${rpm.toFixed(2)}/mi) está por encima del rango del mercado ${mkt.label}.`;rc='#FFD600';rk='rv-yellow';vc='v-yellow';}
+  const re=g('sum-rpm-val');re.style.color=rc;re.innerHTML=fmtD(rpm)+'<span style="font-size:28px;color:#ddd;">/mi</span>';
+  g('mkt-verdict').className='mkt-verdict '+vc;const vt=g('mkt-v-title');vt.textContent=tt;vt.style.color=rc;g('mkt-v-desc').textContent=dt;g('mkt-your').textContent=fmtD(rpm)+'/mi';g('mkt-your').className='rv '+rk;g('t-mkt-mkt').textContent=`Mercado ${mkt.label} (May 2026)`;g('mkt-avg').textContent=fmtD(mkt.min)+' – '+fmtD(mkt.max)+'/mi';g('mkt-be').textContent=fmtD(be)+'/mi';g('sum-goal-v').textContent=fmt(goal);g('sum-miles-v').textContent=miles.toLocaleString()+' mi';
+  const vars=[];if(gv('f-factor')>0)vars.push({l:'Factoring',v:gv('f-factor')+'%'});if(gv('f-dispatch')>0)vars.push({l:'Dispatch',v:gv('f-dispatch')+'%'});if(gv('f-lease')>0)vars.push({l:'Lease',v:gv('f-lease')+'%'});if(gv('f-maint')>0)vars.push({l:'Mantenimiento',v:gv('f-maint')+'%'});if(gv('f-taxes')>0)vars.push({l:'Taxes',v:gv('f-taxes')+'%'});if(gv('f-mpg')>0)vars.push({l:'MPG',v:gv('f-mpg')+' mpg'});
+  g('sum-vars-list').innerHTML=vars.length?vars.map(v=>`<div class="svr"><span class="vl">${v.l}</span><span class="vv">${v.v}</span></div>`).join(''):`<div style="font-size:28px;color:#999;">Sin gastos variables configurados.</div>`;}
+  // ── PERSISTENCE ──────────────────────────────────────────────
+  const LS_PROFILE='rr_profile';
+  const LS_LOADS='rr_loads';
+  const LS_ACTIVE='rr_active';
+
+  function saveToStorage(){
+    const profile={
+      name:APP.name,eq:APP.eq,operatorRpm:APP.operatorRpm,
+      truck:gv('p-truck'),trailer:gv('p-trailer'),insurance:gv('p-insurance'),
+      parking:gv('p-parking'),eld:gv('p-eld'),otherFixed:gv('p-other-fixed'),
+      factor:gv('p-factor'),dispatch:gv('p-dispatch'),lease:gv('p-lease'),
+      maint:gv('p-maint'),taxes:gv('p-taxes'),otros:gv('p-otros'),
+      miles:gv('p-miles'),mpg:gv('p-mpg'),goal:gv('p-goal')
+    };
+    try{
+      localStorage.setItem(LS_PROFILE,JSON.stringify(profile));
+      // Serialize loads — convert Date to ISO string
+      const loadsToSave=APP.loads.map(l=>({...l,date:l.date instanceof Date?l.date.toISOString():l.date}));
+      localStorage.setItem(LS_LOADS,JSON.stringify(loadsToSave));
+      if(APP.activeLoad){
+        const al={...APP.activeLoad,acceptedDate:APP.activeLoad.acceptedDate instanceof Date?APP.activeLoad.acceptedDate.toISOString():APP.activeLoad.acceptedDate};
+        localStorage.setItem(LS_ACTIVE,JSON.stringify(al));
+      } else {
+        localStorage.removeItem(LS_ACTIVE);
+      }
+    }catch(e){console.warn('Storage error',e);}
+  }
+
+  function loadFromStorage(){
+    try{
+      const raw=localStorage.getItem(LS_PROFILE);
+      if(!raw)return false;
+      const p=JSON.parse(raw);
+      // Restore profile fields
+      APP.name=p.name||'';APP.eq=p.eq||'dry-van';APP.operatorRpm=p.operatorRpm||0;
+      const fields=['truck','trailer','insurance','parking','eld','other-fixed','factor','dispatch','lease','maint','taxes','miles','mpg','goal'];
+      const vals={truck:p.truck,trailer:p.trailer,insurance:p.insurance,parking:p.parking,eld:p.eld,'other-fixed':p.otherFixed,factor:p.factor,dispatch:p.dispatch,lease:p.lease,maint:p.maint,taxes:p.taxes,miles:p.miles,mpg:p.mpg,goal:p.goal};
+      fields.forEach(f=>{const el=g('p-'+f);if(el)el.value=vals[f]||0;});
+      g('p-otros').value=p.otros||0;
+      // Restore loads
+      const rawLoads=localStorage.getItem(LS_LOADS);
+      if(rawLoads){
+        APP.loads=JSON.parse(rawLoads).map(l=>({...l,date:new Date(l.date)}));
+      }
+      // Restore active load
+      const rawActive=localStorage.getItem(LS_ACTIVE);
+      if(rawActive){
+        const al=JSON.parse(rawActive);
+        APP.activeLoad={...al,acceptedDate:new Date(al.acceptedDate)};
+      }
+      // Restore equipment selection UI
+      root().querySelectorAll('.eq-bar').forEach(b=>{
+        b.classList.remove('sel');
+        if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes(APP.eq))b.classList.add('sel');
+      });
+      return true;
+    }catch(e){console.warn('Load error',e);return false;}
+  }
+
+  function clearStorage(){
+    try{localStorage.removeItem(LS_PROFILE);localStorage.removeItem(LS_LOADS);localStorage.removeItem(LS_ACTIVE);}catch(e){}
+  }
+  // ─────────────────────────────────────────────────────────────
+
+  function finishOB(){
+    APP.name=g('op-name').value.trim();
+    ['truck','trailer','insurance','parking','eld','other-fixed','factor','dispatch','lease','maint','taxes','miles','mpg','goal'].forEach(f=>{const el=g('p-'+f);if(el)el.value=gv('f-'+f);});
+    g('p-otros').value=gv('f-otros-pct');
+    APP.operatorRpm=calcOpRpm();
+    saveToStorage();
+    g('tab-bar').classList.add('visible');
+    goTab('dashboard');
+    toast('Bienvenido, '+APP.name+'!');
+  }
+  function goTab(tab){const map={dashboard:'dashboard',loads:'loads',history:'history',numbers:'numbers',minimum:'minimum',analyze:'analyze'};showPg(map[tab]||tab);root().querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));const tm={dashboard:'ti-home',loads:'ti-loads',history:'ti-history',numbers:'ti-numbers'};const el=g(tm[tab]);if(el)el.classList.add('active');g('loads-badge').style.display=APP.activeLoad?'block':'none';if(tab==='dashboard')updateDash();if(tab==='history')updateHistory();if(tab==='numbers')calcProfile();if(tab==='minimum')calcMin();if(tab==='loads')updateLoads();}
+  function openAnalyzer(){g('man-dh').value='';g('man-lm').value='';g('gross-pay').value='';g('diesel-price').value='3.85';g('man-sum').style.display='none';g('result-card').style.display='none';g('verdict-card').style.display='none';g('action-bar').classList.remove('show');APP.currentCalc=null;showPg('analyze');root().querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));g('ti-home').classList.add('active');}
+  function getWeekStart(d){const dt=new Date(d);const day=dt.getDay();dt.setDate(dt.getDate()+(day===0?-6:1-day));dt.setHours(0,0,0,0);return dt;}
+  function getWeekEnd(d){const s=getWeekStart(d);const e=new Date(s);e.setDate(s.getDate()+6);e.setHours(23,59,59,999);return e;}
+  function filterLoads(p){const now=new Date();if(p==='week'){const s=getWeekStart(now),e=getWeekEnd(now);return APP.loads.filter(l=>l.date>=s&&l.date<=e);}if(p==='month'){const s=new Date(now.getFullYear(),now.getMonth(),1),e=new Date(now.getFullYear(),now.getMonth()+1,0,23,59,59,999);return APP.loads.filter(l=>l.date>=s&&l.date<=e);}return APP.loads.filter(l=>l.date>=new Date(now.getFullYear(),0,1));}
+  function getRangeLabel(p){const now=new Date(),o={month:'short',day:'numeric'};if(p==='week')return getWeekStart(now).toLocaleDateString('en-US',o)+' – '+getWeekEnd(now).toLocaleDateString('en-US',o);if(p==='month')return new Date(now.getFullYear(),now.getMonth(),1).toLocaleDateString('en-US',o)+' – '+new Date(now.getFullYear(),now.getMonth()+1,0).toLocaleDateString('en-US',o);return 'Jan 1 – Dec 31, '+now.getFullYear();}
+  const VCOL={bad:'#FF1744',fair:'#FFD600',good:'#00C853',excellent:'#00B0FF'};
+  function getVerdict(rate){const gr=getGoalRate();if(!gr)return rate>0?{v:'good',pct:80}:{v:'bad',pct:0};const pct=(rate/gr)*100;if(rate<=0||pct<85)return{v:'bad',pct:Math.max(0,pct)};if(pct<100)return{v:'fair',pct};if(pct<115)return{v:'good',pct};return{v:'excellent',pct};}
+  function updateDash(){const p=getP();const rpm=APP.operatorRpm||calcOpRpm();const re=g('dash-rpm-op');if(re)re.textContent=fmtD(rpm);const f=filterLoads(APP.dashPeriod);const net=f.reduce((a,l)=>a+l.net,0),gross=f.reduce((a,l)=>a+l.gross,0),miles=f.reduce((a,l)=>a+l.loadMiles,0);g('dash-net').textContent=fmt(net);g('dash-gross').textContent=fmt(gross);g('dash-loads').textContent=f.length;g('dash-miles').textContent=miles.toLocaleString();g('dash-rpm').textContent=fmtD(miles>0?gross/miles:0);g('dash-range').textContent=getRangeLabel(APP.dashPeriod);const wNet=filterLoads('week').reduce((a,l)=>a+l.net,0),goal=p.goal,pct=goal>0?Math.min(100,(wNet/goal)*100):0;g('gp-cur').textContent=fmt(wNet);g('gp-goal').textContent=fmt(goal);const bar=g('gpbar');bar.style.width=pct+'%';bar.style.background=pct>=100?'#00C853':pct>=50?'#FFD600':'#FF1744';const diff=wNet-goal;g('gp-sub').textContent=pct>=100?'✓ Meta alcanzada':diff<0?'$'+Math.round(Math.abs(diff))+' para alcanzar '+fmt(goal):'+$'+Math.round(diff)+' sobre meta';}
+  function setPeriod(p,btn){APP.dashPeriod=p;root().querySelectorAll('#rr-pg-dashboard .pp').forEach(b=>b.classList.remove('active'));btn.classList.add('active');updateDash();}
+  function setHistPeriod(p,btn){APP.histPeriod=p;root().querySelectorAll('#rr-pg-history .pp').forEach(b=>b.classList.remove('active'));btn.classList.add('active');updateHistory();}
+  function calcProfit(){const lm=parseFloat(g('man-lm').value)||0,dh=parseFloat(g('man-dh').value)||0;const gross=parseFloat(g('gross-pay').value)||0,ab=g('action-bar');if(lm>0||dh>0){g('m-dh').textContent=dh+' mi';g('m-load').textContent=lm+' mi';g('m-total').textContent=(dh+lm)+' mi';g('man-sum').style.display='block';}else g('man-sum').style.display='none';if(!gross||lm===0){g('result-card').style.display='none';g('verdict-card').style.display='none';ab.classList.remove('show');return;}const p=getP(),total=dh+lm,dp=parseFloat(g('diesel-price').value)||3.85;const diesel=(total/p.mpg)*dp,factor=gross*(p.factor/100),dispatch=gross*(p.dispatch/100),lease=gross*(p.lease/100),maint=gross*(p.maint/100),taxes=gross*(p.taxes/100),otros=gross*(p.otros/100),fixed=getCPM(p)*total;const net=gross-diesel-factor-dispatch-lease-maint-taxes-otros-fixed,rate=lm>0?net/lm:0,grossRate=lm>0?gross/lm:0;const vd=getVerdict(rate),vc=vd.v,col=VCOL[vc];APP.currentCalc={gross,diesel,factor,dispatch,lease,maint,taxes,otros,fixed,net,rate,grossRate,verdict:vc,dh,lm,totalMiles:total,dieselPrice:dp};const rn=g('rh-net');rn.textContent=(net>=0?'':'-')+fmt(Math.abs(net));rn.style.color=col;g('rh-rpm').textContent=fmtD(grossRate)+'/mi';const goalRate=getGoalRate(),diff=rate-goalRate,absDiff=Math.abs(diff).toFixed(2);const dd=g('rh-diff'),dt=g('rh-diff-t');if(diff>0.005){dd.style.background=col+'20';dt.style.color=col;dt.textContent=`↑ +$${absDiff}/mi sobre tu meta`;}else if(diff<-0.005){dd.style.background='#FF174420';dt.style.color='#FF6060';dt.textContent=`↓ -$${absDiff}/mi bajo tu meta`;}else{dd.style.background='#FFD60015';dt.style.color='#FFD600';dt.textContent='= Exactamente en tu meta';}g('r-gross').textContent=fmt(gross);g('r-diesel-lbl').textContent=`Petróleo (${total}mi @ ${p.mpg}mpg × $${dp})`;g('r-diesel').textContent='-'+fmt(diesel);g('r-fact-row').style.display=factor>0?'flex':'none';if(factor>0){g('r-fact-lbl').textContent=`Factoring (${p.factor}%)`;g('r-fact').textContent='-'+fmt(factor);}g('r-disp-row').style.display=dispatch>0?'flex':'none';if(dispatch>0)g('r-disp').textContent='-'+fmt(dispatch);g('r-lease-row').style.display=lease>0?'flex':'none';if(lease>0)g('r-lease').textContent='-'+fmt(lease);g('r-maint-row').style.display=maint>0?'flex':'none';if(maint>0){g('r-maint-lbl').textContent=`Mantenimiento (${p.maint}%)`;g('r-maint').textContent='-'+fmt(maint);}g('r-taxes-row').style.display=taxes>0?'flex':'none';if(taxes>0)g('r-taxes').textContent='-'+fmt(taxes);g('r-fixed-lbl').textContent=`Gastos fijos (${fmtD(getCPM(p))}/mi × ${total}mi)`;g('r-fixed').textContent='-'+fmt(fixed);g('r-miles-info').textContent=`${lm}mi carga + ${dh}mi dh = ${total}mi`;g('result-card').style.display='block';const vc2=g('verdict-card');vc2.className='vc '+vc;const vl=g('verdict-label');vl.className='vl '+vc;vl.textContent=vc.toUpperCase();const vDesc={bad:'No cubre tu objetivo semanal.',fair:'Cerca de tu meta. Acepta si no hay mejor opción.',good:'Cumple tu objetivo semanal.',excellent:'Por encima de tu meta. Tómala.'};g('verdict-desc').textContent=vDesc[vc];const vpf=g('verdict-bar');vpf.className='vpf '+vc;vpf.style.width=Math.min(130,vd.pct)+'%';vc2.style.display='block';ab.classList.add('show');}
+  function acceptLoad(){if(!APP.currentCalc)return;APP.activeLoad={...APP.currentCalc,acceptedDate:new Date(),baseNet:APP.currentCalc.net};openAnalyzer();toast('Carga aceptada');g('loads-badge').style.display='block';goTab('loads');}
+  function discardLoad(){openAnalyzer();toast('Carga descartada');goTab('dashboard');}
+  function updateLoads(){const na=g('loads-no-active'),ac=g('loads-active'),er=g('en-ruta');if(!APP.activeLoad){na.style.display='flex';ac.style.display='none';er.style.display='none';return;}na.style.display='none';ac.style.display='flex';er.style.display='block';const l=APP.activeLoad;g('loads-cities').textContent='Carga activa';g('loads-meta').textContent=l.lm+' mi carga · '+l.dh+' mi deadhead';g('loads-date').textContent=l.acceptedDate.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});g('loads-profit').textContent=fmt(l.net);g('loads-rate').textContent=fmtD(l.grossRate)+'/mi';g('loads-gross').textContent=fmt(l.gross);g('loads-diesel').textContent='-'+fmt(l.diesel);g('loads-vars').textContent='-'+fmt((l.factor||0)+(l.dispatch||0)+(l.lease||0)+(l.maint||0)+(l.taxes||0)+(l.otros||0));g('loads-fixed').textContent='-'+fmt(l.fixed);}
+  function showReview(){if(!APP.activeLoad)return;const l=APP.activeLoad;g('rev-info').textContent=`${l.lm} mi carga · ${l.dh} mi deadhead · Total ${l.totalMiles} mi`;g('rev-miles-info').textContent=`Aceptada ${l.acceptedDate.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}`;g('rev-base').textContent=fmt(l.baseNet);g('rev-final').textContent=fmt(l.baseNet);['extra-tolls','extra-lumper','extra-other','pickup','delivery'].forEach(id=>{const el=g(id);if(el)el.value='';});['rev-tolls-row','rev-lumper-row','rev-other-row'].forEach(id=>g(id).style.display='none');showPg('review');}
+  function calcFinal(){if(!APP.activeLoad)return;const t=parseFloat(g('extra-tolls').value)||0,lu=parseFloat(g('extra-lumper').value)||0,o=parseFloat(g('extra-other').value)||0;const fin=APP.activeLoad.baseNet-t-lu-o;const show=(id,rowId,val)=>{g(rowId).style.display=val>0?'flex':'none';if(val>0)g(id).textContent='-'+fmt(val);};show('rev-tolls','rev-tolls-row',t);show('rev-lumper','rev-lumper-row',lu);show('rev-other-v','rev-other-row',o);g('rev-final').textContent=fmt(fin);}
+  function saveLoad(){if(!APP.activeLoad)return;const l=APP.activeLoad;const t=parseFloat(g('extra-tolls').value)||0,lu=parseFloat(g('extra-lumper').value)||0,o=parseFloat(g('extra-other').value)||0;const pickup=(g('pickup').value||'').trim().toUpperCase();const delivery=(g('delivery').value||'').trim().toUpperCase();const route=pickup&&delivery?`${pickup} → ${delivery}`:pickup||delivery||'CARGA';const fn=l.baseNet-t-lu-o,fr=l.lm>0?fn/l.lm:0;APP.loads.unshift({id:Date.now(),route,pickup,delivery,loadMiles:l.lm,dh:l.dh,gross:l.gross,diesel:l.diesel,dieselPrice:l.dieselPrice||3.85,factor:l.factor||0,dispatch:l.dispatch||0,lease:l.lease||0,maint:l.maint||0,taxes:l.taxes||0,otros:l.otros||0,fixed:l.fixed,tolls:t,lumper:lu,otherExtra:o,net:fn,rate:fr,grossRate:l.grossRate,date:new Date()});APP.activeLoad=null;g('loads-badge').style.display='none';saveToStorage();toast('Carga guardada');goTab('history');}
+  function updateHistory(){const f=filterLoads(APP.histPeriod);const net=f.reduce((a,l)=>a+l.net,0),miles=f.reduce((a,l)=>a+l.loadMiles,0),gross=f.reduce((a,l)=>a+l.gross,0);g('hs-loads').textContent=f.length;g('hs-miles').textContent=miles.toLocaleString();g('hs-gross').textContent=fmt(gross);g('hs-net').textContent=fmt(net);g('hs-rpm').textContent=fmtD(miles>0?gross/miles:0);g('hist-range').textContent=getRangeLabel(APP.histPeriod);const list=g('hist-list');if(!f.length){list.innerHTML=`<div style="text-align:center;padding:48px;color:#ddd;font-size:19px;">No hay cargas en este período</div>`;return;}list.innerHTML=f.map(l=>{const vd=getVerdict(l.rate),col=VCOL[vd.v];const dateStr=l.date.toLocaleDateString('en-US',{month:'short',day:'numeric'});return`<div class="lcard" style="border-left-color:${col};"><div class="lc-actions"><button class="lc-btn" onclick="RR.openEdit(${l.id})"><i class="ti ti-pencil"></i></button><button class="lc-btn" onclick="RR.askDel(${l.id})"><i class="ti ti-trash"></i></button></div><div class="lcr">${l.route}</div><div class="lcm">${l.loadMiles.toLocaleString()} mi · ${l.dh} mi dh · ${dateStr}</div><div class="lcn"><div><div style="font-size:28px;color:#999;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Bruto</div><div style="font-size:28px;font-weight:600;color:#eee;">${fmt(l.gross)}</div></div><div style="text-align:right;"><div style="font-size:28px;color:#999;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;">Ganancia</div><div style="font-size:28px;font-weight:700;color:${col};">${fmt(l.net)}</div></div></div></div>`;}).join('');}
+  function askDel(id){const l=APP.loads.find(x=>x.id===id);if(!l)return;APP.pendingDelId=id;g('del-s').innerHTML=`<strong style="color:#fff;">${l.route}</strong><br><span style="color:#eee;">Esta acción no se puede deshacer.</span>`;g('modal-del').classList.add('show');}
+  function closeDel(){APP.pendingDelId=null;g('modal-del').classList.remove('show');}
+  function confirmDel(){if(!APP.pendingDelId)return;APP.loads=APP.loads.filter(l=>l.id!==APP.pendingDelId);closeDel();saveToStorage();updateHistory();toast('Carga eliminada',true);}
+  function openEdit(id){const l=APP.loads.find(x=>x.id===id);if(!l)return;APP.editingId=id;g('edit-pickup').value=l.pickup||'';g('edit-delivery').value=l.delivery||'';g('edit-miles').value=l.loadMiles;g('edit-dh').value=l.dh;g('edit-gross').value=Math.round(l.gross);g('edit-diesel').value=l.dieselPrice||3.85;g('edit-net').value=Math.round(l.net);g('modal-edit').classList.add('show');}
+  function closeEdit(){APP.editingId=null;g('modal-edit').classList.remove('show');}
+  function saveEdit(){const l=APP.loads.find(x=>x.id===APP.editingId);if(!l)return;const pickup=(g('edit-pickup').value||'').trim().toUpperCase();const delivery=(g('edit-delivery').value||'').trim().toUpperCase();l.pickup=pickup;l.delivery=delivery;l.route=pickup&&delivery?`${pickup} → ${delivery}`:pickup||delivery||l.route;const nm=parseFloat(g('edit-miles').value);if(nm>0)l.loadMiles=nm;const nd=parseFloat(g('edit-dh').value);if(!isNaN(nd))l.dh=nd;const ng=parseFloat(g('edit-gross').value);if(ng>0)l.gross=ng;const nd2=parseFloat(g('edit-diesel').value);if(nd2>0)l.dieselPrice=nd2;const nn=parseFloat(g('edit-net').value);if(!isNaN(nn))l.net=Math.round(nn);l.rate=l.loadMiles>0?l.net/l.loadMiles:l.rate;l.grossRate=l.loadMiles>0?l.gross/l.loadMiles:l.grossRate;closeEdit();updateHistory();toast('Carga actualizada');}
+  function calcMin(){const p=getP(),lm=parseFloat(g('min-lm').value)||0,dh=parseFloat(g('min-dh').value)||0,dp=parseFloat(g('min-diesel').value)||3.85;if(lm===0){g('min-empty').style.display='block';g('min-results').style.display='none';return;}g('min-empty').style.display='none';g('min-results').style.display='block';const total=lm+dh,diesel=(total/p.mpg)*dp,cpm=getCPM(p),fixed=cpm*total,vp=getVarPct(p),safe=vp<1?1-vp:0.5;const gr=getGoalRate(),fpl=lm>0?fixed/lm:0,dpl=lm>0?diesel/lm:0;const goalGrossRate=(gr+fpl+dpl)/safe,goalTotal=goalGrossRate*lm;g('exc-total').textContent=fmt(goalTotal*1.15);g('goal-total').textContent=fmt(goalTotal);g('acc-total').textContent=fmt(goalTotal*0.85);g('be-total').textContent=fmt((diesel+fixed)/(safe*lm)*lm);g('min-hint').textContent=`Basado en tu meta de $${p.goal.toLocaleString()}/semana`;}
+  function calcProfile(){const p=getP(),monthly=getMonthly(p);const varPct=getVarPct(p),safe=varPct<1?1-varPct:0.5;const cpm=p.miles>0?monthly/p.miles:0;const wm=p.miles/4,goalRate=wm>0?p.goal/wm:0;const dpm=p.miles>0?(p.miles/p.mpg)*3.85/p.miles:0;const rpm=goalRate>0?(goalRate+cpm+dpm)/safe:0;APP.operatorRpm=rpm;const mkt=MKT[APP.eq]||MKT['dry-van'];let rc='#00C853';if(rpm<mkt.min)rc='#00B0FF';else if(rpm>mkt.max)rc='#FFD600';const el=g('prof-rpm-val');el.style.color=rc;el.innerHTML=fmtD(rpm)+'<span style="font-size:28px;color:#ddd;">/mi</span>';g('pcc-goal').textContent=fmt(p.goal);g('pcc-miles').textContent=p.miles.toLocaleString()+' mi';const gr=wm>0?p.goal/wm:0;g('wgb-weekly').textContent=fmt(p.goal)+'/sem';g('wgb-miles').textContent=Math.round(wm).toLocaleString()+' mi';g('wgb-rate').textContent=fmtD(gr)+'/mi';}
+  function saveProfile(){APP.operatorRpm=calcOpRpm();calcProfile();updateDash();saveToStorage();toast('Números guardados');}
+  function saveEdit(){const l=APP.loads.find(x=>x.id===APP.editingId);if(!l)return;const pickup=(g('edit-pickup').value||'').trim().toUpperCase();const delivery=(g('edit-delivery').value||'').trim().toUpperCase();l.pickup=pickup;l.delivery=delivery;l.route=pickup&&delivery?`${pickup} → ${delivery}`:pickup||delivery||l.route;const nm=parseFloat(g('edit-miles').value);if(nm>0)l.loadMiles=nm;const nd=parseFloat(g('edit-dh').value);if(!isNaN(nd))l.dh=nd;const ng=parseFloat(g('edit-gross').value);if(ng>0)l.gross=ng;const nd2=parseFloat(g('edit-diesel').value);if(nd2>0)l.dieselPrice=nd2;const nn=parseFloat(g('edit-net').value);if(!isNaN(nn))l.net=Math.round(nn);l.rate=l.loadMiles>0?l.net/l.loadMiles:l.rate;l.grossRate=l.loadMiles>0?l.gross/l.loadMiles:l.grossRate;closeEdit();saveToStorage();updateHistory();toast('Carga actualizada');}
+
+  function initCityInputs(){['pickup','delivery','edit-pickup','edit-delivery'].forEach(id=>{const el=g(id);if(el)el.addEventListener('input',()=>ucInput(el));});}
+
+  function resetData(){
+    if(!confirm('¿Borrar todos los datos y empezar desde cero? Esta acción no se puede deshacer.'))return;
+    clearStorage();
+    Object.assign(APP,{name:'',eq:'dry-van',activeLoad:null,loads:[],histPeriod:'week',dashPeriod:'week',pendingDelId:null,currentCalc:null,editingId:null,operatorRpm:0});
+    g('tab-bar').classList.remove('visible');g('loads-badge').style.display='none';
+    root().querySelectorAll('.pg').forEach(p=>p.classList.remove('active'));
+    document.getElementById('rr-pg-lang').classList.add('active');
+    root().querySelectorAll('input[type=number]').forEach(el=>{el.value=0;});
+    g('op-name').value='';g('btn-name').disabled=true;
+    g('modal-del').classList.remove('show');g('modal-edit').classList.remove('show');
+  }
+  function reset(){resetData();}
+
+  // ── AUTO-LOGIN on startup ─────────────────────────────────────
+  function init(){
+    setTimeout(()=>{
+      initCityInputs();
+      const loaded=loadFromStorage();
+      if(loaded&&APP.name){
+        // Skip onboarding — go straight to dashboard
+        g('tab-bar').classList.add('visible');
+        g('loads-badge').style.display=APP.activeLoad?'block':'none';
+        goTab('dashboard');
+        // Silently recalculate operator RPM from saved profile
+        APP.operatorRpm=calcOpRpm();
+        const re=g('dash-rpm-op');if(re)re.textContent=fmtD(APP.operatorRpm);
+      }
+    },100);
+  }
+  init();
+  // ─────────────────────────────────────────────────────────────
+
+  return{start,goPg,showPg,checkName,selEq,prevGoal,buildSum,finishOB,goTab,openAnalyzer,calcProfit,acceptLoad,discardLoad,updateLoads,showReview,calcFinal,saveLoad,updateHistory,setPeriod,setHistPeriod,calcMin,calcProfile,saveProfile,askDel,closeDel,confirmDel,openEdit,closeEdit,saveEdit,reset,resetData};
+})();
+</script>
+</body>
+</html>
